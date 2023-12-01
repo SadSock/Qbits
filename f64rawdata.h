@@ -118,8 +118,12 @@ private:
     this->m_f64Hex = QString::asprintf("0x%llx", m_f64Raw);
     this->m_u64Str = QString::asprintf("%llu", m_f64Raw);
     this->m_s64Str = QString::asprintf("%lld", m_f64Raw);
-    this->m_f64Str = QString::asprintf("%lf", *(double*)&m_f64Raw);
+    //this->m_f64Str = QString::asprintf("%lf", *(double*)&m_f64Raw);
     this->m_f64Bits = QString::number(m_f64Raw,2);
+
+
+    //float
+
   }
 };
 

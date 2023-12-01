@@ -21,6 +21,7 @@ qt_add_qml_module(appQbits
     QML_FILES
     SOURCES
     SOURCES f64rawdata.h
+    SOURCES e5m2rawdata.h
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -31,7 +32,7 @@ set_target_properties(appQbits PROPERTIES
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+    #WIN32_EXECUTABLE TRUE
 )
 
 target_link_libraries(appQbits

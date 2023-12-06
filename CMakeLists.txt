@@ -5,6 +5,9 @@ project(Qbits VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GMPXX REQUIRED IMPORTED_TARGET gmpxx)
+pkg_check_modules(MPFR REQUIRED IMPORTED_TARGET mpfr)
 
 qt_standard_project_setup()
 
@@ -20,8 +23,9 @@ qt_add_qml_module(appQbits
     QML_FILES
     QML_FILES
     SOURCES
-    SOURCES f64rawdata.h
+    SOURCES e11m53rawdata.h
     SOURCES e5m2rawdata.h
+    SOURCES e4m3rawdata.h
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -36,8 +40,10 @@ set_target_properties(appQbits PROPERTIES
 )
 
 target_link_libraries(appQbits
-    PRIVATE Qt6::Quick
+    PRIVATE Qt6::Quick PkgConfig::GMPXX PkgConfig::MPFR
 )
+
+# target_link_libraries(appQbits gmp libgmp)
 
 include(GNUInstallDirs)
 install(TARGETS appQbits
@@ -45,3 +51,5 @@ install(TARGETS appQbits
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+

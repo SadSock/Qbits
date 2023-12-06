@@ -1,7 +1,10 @@
 #ifndef E5M2RAWDATA_H
 #define E5M2RAWDATA_H
 #include<QObject>
-#include <QDecimal>
+#include<gmp.h>
+#include<bitset>
+#include <QDebug>
+//#include <QDecimal>
 
 class E5m2RawData : public QObject
 {
@@ -113,15 +116,78 @@ private:
   QString m_e5m2Str;
   QString m_e5m2Hex;
   QString m_e5m2Bits;
+  bool m_sign;
+  int32_t m_exp;
+  std::bitset<8> m_mantiss;
   void updateRawData(){
+    this->m_sign = (this->m_e5m2Raw >> 7 == 1);
+    this->m_exp = (this->m_e5m2Raw << 1 >> 3) - 15;
+    this->m_mantiss = (this->m_e5m2Raw << 6 >> 6);
     this->m_e5m2Hex = QString::asprintf("0x%x", m_e5m2Raw);
     this->m_u8Str = QString::asprintf("%u", m_e5m2Raw);
     this->m_s8Str = QString::asprintf("%d", m_e5m2Raw);
-    //this->m_e5m2Str = QString::asprintf("%lf", *(double*)&m_e5m2Raw);
     this->m_e5m2Bits = QString::number(m_e5m2Raw,2);
 
+    mpf_t r;
+    mpf_t one;
+    mpf_t two;
+    mpf_init(r);
+    mpf_init(one);
+    mpf_init(two);
+    mpf_set_d(r, 1.0);
+    mpf_set_d(one, 1.0);
+    mpf_set_d(two,2.0);
+    for(int i = 1; i>= 0; i--){
+        mpf_div(one,one,two);
+        if(m_mantiss[i]){
+          mpf_add(r,r,one);
+        }
+    }
+    if(this->m_exp >=0){
+        mpf_mul_2exp(r, r, this->m_exp);}
+    else{
+        mpf_div_2exp(r,r,-this->m_exp);
+    }
+    mp_exp_t p_point_pos;
+    QString Qstr = mpf_get_str(nullptr, &p_point_pos, 10, 0, r);
+
+    qDebug()  << p_point_pos;
+    qDebug()  << Qstr;
+    qDebug()  <<"\n";
+
+    this->m_e5m2Str.clear();
+    if(p_point_pos > 0){
+     // int p = 0;
+
+      //for(; p < p_point_pos; p++ ){
+
+      this->m_e5m2Str.append(Qstr.left(p_point_pos));
+     if(Qstr.length() > p_point_pos){
+      this->m_e5m2Str.append('.');
+      this->m_e5m2Str.append(Qstr.mid(p_point_pos));
+      }
+     if(Qstr.length() < p_point_pos){
+        int num_of_zero = Qstr.length() - p_point_pos;
+        for(int i = 0; i < num_of_zero; i++)
+          this->m_e5m2Str.append('0');
+      }
+    }
+    //if(p_point_pos == 0){
+    //  this->m_e5m2Str.append(Qstr);
+    //}
+    //}
+
+    if(p_point_pos <= 0){
+      this->m_e5m2Str.append("0.");
+      for(int i = 0; i < -p_point_pos;i++)
+        this->m_e5m2Str.append('0');
+      this->m_e5m2Str.append(Qstr);
+    }
 
 
+    //char str[100000];
+    //gmp_snprintf(str,100000,"%.*Ff",r);
+    //this->m_e5m2Str = QString::asprintf("%s",str);
   }
 };
 
